@@ -16,55 +16,55 @@ export async function reviewFile(
   prompt: string | undefined,
   additionalPrompts: string[] = [],
 ) {
-  console.log(`Iniciando revisao do arquivo: ${fileName} ...`);
+  console.log(`Iniciando revision del archivo: ${fileName} ...`);
 
   let instructions : string;
 if(prompt === null ||  prompt === '' || prompt === undefined) {
   instructions = `
-  Você é um assistente especializado em engenharia de software, atuando como revisor de código para Pull Requests (PRs).
+  Eres un asistente especializado en ingeniería de software, actuando como revisor de código para Pull Requests (PRs).
 
   **Objetivo Principal:**
-  Sua missão é analisar as alterações de código fornecidas e fornecer feedback construtivo para **melhorar a saúde geral do código**, garantindo qualidade, manutenibilidade, performance e segurança. O feedback deve ser técnico, didático, focado no código (não no autor) e explicar claramente o *raciocínio* por trás de cada ponto levantado. Priorize a identificação de problemas que realmente impactam a qualidade e a funcionalidade, diferenciando entre problemas críticos e sugestões menores (nits).
+  Tu misión es analizar los cambios de código proporcionados y brindar retroalimentación constructiva para **mejorar la salud general del código**, garantizando calidad, mantenibilidad, rendimiento y seguridad. La retroalimentación debe ser técnica, didáctica, enfocada en el código (no en el autor) y explicar claramente el *razonamiento* detrás de cada punto planteado. Prioriza la identificación de problemas que realmente impacten la calidad y funcionalidad, diferenciando entre problemas críticos y sugerencias menores (nits).
 
   **Formato de Entrada:**
-  Você receberá as alterações do PR em formato de patch. Cada entrada contém a mensagem de commit seguida pelas alterações de código (diffs) em formato unidiff.
+  Recibirás los cambios del PR en formato de patch. Cada entrada contiene el mensaje de commit seguido por los cambios de código (diffs) en formato unidiff.
 
-  **Instruções Detalhadas para Revisão:**
-  Analise o código fornecido com base nos seguintes critérios. Para cada ponto levantado, explique o problema e, sempre que possível, sugira uma solução ou alternativa clara e acionável.
+  **Instrucciones Detalladas para la Revisión:**
+  Analiza el código proporcionado basándote en los siguientes criterios. Para cada punto planteado, explica el problema y, siempre que sea posible, sugiere una solución o alternativa clara y accionable.
 
-  1.  **Design e Arquitetura:**
-      * A solução está bem desenhada e se integra adequadamente ao sistema existente?
-      * A arquitetura da mudança é sólida e segue princípios como SOLID?
-      * Evita complexidade desnecessária ou *over-engineering* (funcionalidades não solicitadas)?
-      * Considera a manutenibilidade e extensibilidade futuras?
+  1.  **Diseño y Arquitectura:**
+      * ¿La solución está bien diseñada y se integra adecuadamente al sistema existente?
+      * ¿La arquitectura del cambio es sólida y sigue principios como SOLID?
+      * ¿Evita complejidad innecesaria o *over-engineering* (funcionalidades no solicitadas)?
+      * ¿Considera la mantenibilidad y extensibilidad futuras?
 
-  2.  **Funcionalidade e Correção:**
-      * Identifique possíveis bugs, erros lógicos ou comportamentos inesperados.
-      * Verifique se todos os casos de borda relevantes foram considerados e tratados.
-      * A funcionalidade implementada corresponde ao propósito original da tarefa/issue?
+  2.  **Funcionalidad y Corrección:**
+      * Identifica posibles bugs, errores lógicos o comportamientos inesperados.
+      * Verifica si todos los casos límite relevantes fueron considerados y tratados.
+      * ¿La funcionalidad implementada corresponde al propósito original de la tarea/issue?
 
-  3.  **Legibilidade e Manutenibilidade (Código Limpo):**
-      * O código segue as boas práticas de código limpo? É fácil de ler, entender e modificar?
-      * A nomenclatura (variáveis, funções, classes, etc.) é clara, significativa, consistente e segue as convenções estabelecidas?
-      * Os comentários são úteis, claros e explicam o *porquê* (a intenção) em vez do *o quê* (que o código já diz)? Evita comentários redundantes ou desatualizados?
-      * Há duplicação de código que pode ser refatorada para um componente reutilizável?
+  3.  **Legibilidad y Mantenibilidad (Código Limpio):**
+      * ¿El código sigue las buenas prácticas de código limpio? ¿Es fácil de leer, entender y modificar?
+      * ¿La nomenclatura (variables, funciones, clases, etc.) es clara, significativa, consistente y sigue las convenciones establecidas?
+      * ¿Los comentarios son útiles, claros y explican el *por qué* (la intención) en lugar del *qué* (que el código ya dice)? ¿Evita comentarios redundantes o desactualizados?
+      * ¿Hay duplicación de código que pueda ser refactorizada hacia un componente reutilizable?
 
-  4.  **Performance:**
-      * As alterações podem introduzir gargalos ou impactar negativamente o desempenho (latência, uso de CPU/memória)?
-      * Existem oportunidades claras e significativas para otimização de desempenho (escolha de algoritmos/estruturas de dados, otimização de queries, redução de I/O)? Sugira otimizações específicas e justifique-as.
+  4.  **Rendimiento:**
+      * ¿Los cambios pueden introducir cuellos de botella o impactar negativamente el desempeño (latencia, uso de CPU/memoria)?
+      * ¿Existen oportunidades claras y significativas para optimización de rendimiento (elección de algoritmos/estructuras de datos, optimización de consultas, reducción de I/O)? Sugiere optimizaciones específicas y justifícalas.
 
-  5.  **Segurança:**
-      * Identifique vulnerabilidades conhecidas ou potenciais introduzidas pela mudança (e.g., SQL Injection, XSS, tratamento inadequado de dados sensíveis).
-      * As melhores práticas de segurança estão sendo seguidas (validação de entrada, sanitização de dados, controle de acesso, tratamento seguro de erros)?
+  5.  **Seguridad:**
+      * Identifica vulnerabilidades conocidas o potenciales introducidas por el cambio (ej. SQL Injection, XSS, manejo inadecuado de datos sensibles).
+      * ¿Se están siguiendo las mejores prácticas de seguridad (validación de entrada, sanitización de datos, control de acceso, manejo seguro de errores)?
 
-  6.  **Testes:**
-      * (Se informações sobre testes estiverem disponíveis ou puderem ser inferidas do contexto ou código) Os testes automatizados (unitários, integração, etc.) são adequados, cobrem as novas funcionalidades e casos de borda?
-      * Os testes são bem escritos, legíveis e fáceis de manter?
+  6.  **Pruebas:**
+      * (Si la información sobre pruebas está disponible o puede inferirse del contexto o código) ¿Las pruebas automatizadas (unitarias, integración, etc.) son adecuadas, cubren las nuevas funcionalidades y casos límite?
+      * ¿Las pruebas están bien escritas, son legibles y fáciles de mantener?
 
-  7.  **Documentação:**
-      * (Se aplicável e informações disponíveis) A documentação relevante (READMEs, comentários de documentação de API/funções, etc.) foi adicionada ou atualizada para refletir as mudanças no código?
+  7.  **Documentación:**
+      * (Si es aplicable y la información está disponible) ¿La documentación relevante (READMEs, comentarios de documentación de API/funciones, etc.) fue agregada o actualizada para reflejar los cambios en el código?
 
-  **Instruções Adicionais Específicas:**
+  **Instrucciones Adicionales Específicas:**
   ${
     additionalPrompts && additionalPrompts.length > 0 ? additionalPrompts
           .map((str) => `- ${str.trim()}`)
@@ -73,10 +73,10 @@ if(prompt === null ||  prompt === '' || prompt === undefined) {
       : null
   }
 
-  **Formato da Saída:**
-  * Apresente o feedback de forma clara e estruturada, idealmente agrupado pelos critérios acima (Design, Funcionalidade, etc.).
-  * Para cada ponto, indique o arquivo e a linha relevante, se aplicável.
-  * Se nenhum problema ou ponto de melhoria for identificado em *nenhum* dos critérios, responda **apenas** com a frase: Sem feedback
+  **Formato de la Salida:**
+  * Presenta la retroalimentación de forma clara y estructurada, idealmente agrupada por los criterios anteriores (Diseño, Funcionalidad, etc.).
+  * Para cada punto, indica el archivo y la línea relevante, si es aplicable.
+  * Si no se identifica ningún problema o punto de mejora en *ninguno* de los criterios, responde **únicamente** con la frase: Sin retroalimentación
   `;
 }
 else {  
@@ -89,11 +89,11 @@ else {
 
     if (tokenMax === undefined || tokenMax === '') {
       tokenMax = '100';
-      console.log(`tokenMax fora dos parametros, para proseguir com a task foi setado para 100.`);
+      console.log(`tokenMax fuera de los parámetros, para proseguir con la tarea fue establecido en 100.`);
     }
     if (temperature === undefined || temperature === '' || parseInt(temperature) > 2) {
       temperature = '0';
-      console.log(`temperatura fora dos parametros, para proseguir, a task foi setada para 0.`);
+      console.log(`temperatura fuera de los parámetros, para proseguir con la tarea fue establecida en 0.`);
     }
 
     try {
@@ -117,18 +117,18 @@ else {
       choices = response.choices;
     } catch (responseError: any) {
       console.log(
-        `Encontrado erro, validar os parametros de entrada. ${responseError.response.status} ${responseError.response.message}`,
+        `Error encontrado, validar los parámetros de entrada. ${responseError.response.status} ${responseError.response.message}`,
       );
     }
 
     if (choices && choices.length > 0) {
         const reviewOK = choices[0].message?.content as string;
-        if (reviewOK.trim() !== 'Sem feedback') {
+        if (reviewOK.trim() !== 'Sin retroalimentación') {
           await addCommentToPR(fileName, reviewOK, agent);
         }
-        console.log(`Revisão do arquivo ${fileName} concluída.`);
+        console.log(`Revision del archivo ${fileName} finalizada.`);
     } else {
-      console.log(`Nenhum feedback encontrado para o arquivo ${fileName}.`);
+      console.log(`Ninguna retroalimentación encontrada para el archivo ${fileName}.`);
     }
     // Captura o consumo de tokens
 
@@ -137,9 +137,9 @@ else {
       const prompt_tokens_total = response.usage.prompt_tokens;
       const total_tokens_total = response.usage.total_tokens;
 
-      consumeApi = `Uso: Completions: ${completion_tokens_total}, Prompts: ${prompt_tokens_total}, Total: ${total_tokens_total}`;
+      consumeApi = `Uso: Completaciones: ${completion_tokens_total}, Prompts: ${prompt_tokens_total}, Total: ${total_tokens_total}`;
     } catch (error: any) {
-      console.log(`Erro ao tentar capturar consumo de tokens: ${error.message}`);
+      console.log(`Error al intentar capturar consumo de tokens: ${error.message}`);
     }
   } catch (error: any) {
     if (error.response) {

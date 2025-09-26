@@ -19,6 +19,17 @@
   "instanceNameFormat": "JPCompcombr $(message)",
   "inputs": [
     {
+      "name": "analysis_mode",
+      "type": "pickList",
+      "label": "Modo de analisis",
+      "defaultValue": "file",
+      "options": {
+        "file": "Por archivo (uno por cada archivo modificado)",
+        "global": "Global (un unico analisis para el PR)"
+      },
+      "helpMarkDown": "Elije si quieres comentarios por archivo o un informe global"
+    },
+    {
       "name": "api_key",
       "type": "string",
       "label": "Api key",

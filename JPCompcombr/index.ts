@@ -13,10 +13,11 @@ import minimatch from 'minimatch';
 async function run() {
   try {
     if (tl.getVariable('Build.Reason') !== 'PullRequest') {
-      tl.setResult(tl.TaskResult.Skipped, "Esta tarefa deve ser executada somente quando o build for acionado atraves de uma solicitacao pr.");
+      tl.setResult(tl.TaskResult.Skipped, "Esta tarea debe ejecutarse solo cuando la compilación sea activada a través de una solicitud de PR.");
       return;
     }
-
+    
+    const analysisMode = tl.getInput('analysis_mode', true) as 'file' | 'global';
     const _repository = new Repository();
     const pr_1 = require("./pr");
     const reviewTs = require("./review");
@@ -65,12 +66,13 @@ async function run() {
 
     let filesToReview = await _repository.GetChangedFiles(fileExtensions, filesToExclude);
     if (filesToReview.length === 0 || filesToReview.length == 0) {
-      console.log(`Nao encontrado codigo passivel de revisao, Sem feedback para revisao de codigo ou revise os parametros de entrada da tarefa.`);
-      tl.setResult(tl.TaskResult.SucceededWithIssues, "Nao encontrado codigo passivel de revisao, Sem feedback para revisao de codigo ou revise os parametros de entrada da tarefa.");
+      let message = `No se encontró código sujeto a revisión. Sin comentarios para revisión de código o revise los parámetros de entrada de la tarea.`
+      console.log(message);
+      tl.setResult(tl.TaskResult.SucceededWithIssues, message);
       return
     }
 
-    console.log(`Detectado alteracao em ${filesToReview.length} arquivo(s)`);
+    console.log(`Se detectaron cambios en ${filesToReview.length} archivo(s)`);
 
     for (const element of filesToReview) {
 
