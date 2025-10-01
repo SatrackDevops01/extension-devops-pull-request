@@ -150,3 +150,164 @@ else {
     }
   }
 }
+
+export async function reviewCompletePR(
+  fullPRDiff: string,
+  prNumber: string,
+  agent: http.Agent | https.Agent,
+  apiKey: string,
+  aoiEndpoint: string,
+  tokenMax: string | undefined,
+  temperature: string | undefined,
+  prompt: string | undefined,
+  additionalPrompts: string[] = [],
+) {
+  console.log(`Iniciando revisión completa del PR #${prNumber} ...`);
+
+  // Obtener todos los cambios del PR
+  if (!fullPRDiff || fullPRDiff.trim() === '') {
+    console.log(`No se encontraron cambios en el PR #${prNumber}.`);
+    return;
+  }
+
+  let instructions: string;
+  if (prompt === null || prompt === '' || prompt === undefined) {
+    instructions = `
+    Eres un asistente especializado en ingeniería de software, actuando como revisor de código para Pull Requests (PRs).
+
+    **Objetivo Principal:**
+    Tu misión es analizar TODOS los cambios del Pull Request completo y brindar retroalimentación constructiva holística para **mejorar la salud general del código**, garantizando calidad, mantenibilidad, rendimiento y seguridad. La retroalimentación debe ser técnica, didáctica, enfocada en el código (no en el autor) y explicar claramente el *razonamiento* detrás de cada punto planteado. Considera el impacto general de todos los cambios en conjunto, no solo archivos individuales.
+
+    **Formato de Entrada:**
+    Recibirás todos los cambios del PR en formato de patch unificado, incluyendo múltiples archivos y sus modificaciones.
+
+    **Instrucciones Detalladas para la Revisión Completa:**
+    Analiza el conjunto completo de cambios basándote en los siguientes criterios:
+
+    1.  **Diseño y Arquitectura General:**
+        * ¿La solución completa está bien diseñada y mantiene la coherencia arquitectónica?
+        * ¿Los cambios en diferentes archivos trabajan bien en conjunto?
+        * ¿Se mantiene la consistencia de patrones de diseño a través del PR?
+        * ¿Evita complejidad innecesaria o funcionalidades no solicitadas?
+
+    2.  **Funcionalidad y Corrección Integral:**
+        * Identifica posibles bugs o inconsistencias entre archivos modificados
+        * ¿Los cambios en conjunto cumplen el propósito general del PR?
+        * ¿Hay dependencias entre archivos que puedan causar problemas?
+
+    3.  **Coherencia y Consistencia:**
+        * ¿La nomenclatura es consistente a través de todos los archivos?
+        * ¿Se siguen las mismas convenciones de código en todo el PR?
+        * ¿Los estilos de comentarios y documentación son coherentes?
+
+    4.  **Impacto en Rendimiento General:**
+        * ¿Los cambios en conjunto pueden afectar el rendimiento del sistema?
+        * ¿Hay oportunidades de optimización que abarquen múltiples archivos?
+
+    5.  **Seguridad del Sistema:**
+        * ¿Los cambios introducen vulnerabilidades cuando se consideran en conjunto?
+        * ¿Se mantienen las mejores prácticas de seguridad consistentemente?
+
+    6.  **Cobertura y Estrategia de Pruebas:**
+        * ¿La estrategia de pruebas es adecuada para el alcance completo del PR?
+        * ¿Las pruebas cubren las interacciones entre componentes modificados?
+
+    7.  **Documentación y Mantenibilidad:**
+        * ¿La documentación refleja adecuadamente todos los cambios realizados?
+        * ¿El PR mantiene o mejora la mantenibilidad general del código?
+
+    **Instrucciones Adicionales Específicas:**
+    ${
+      additionalPrompts && additionalPrompts.length > 0 ? additionalPrompts
+            .map((str) => `- ${str.trim()}`)
+            .filter(Boolean)
+            .join('\n')
+        : ''
+    }
+
+    **Formato de la Salida:**
+    * Presenta una revisión integral considerando el PR como un todo
+    * Agrupa la retroalimentación por impacto: Crítico, Importante, Sugerencias
+    * Para cada punto, menciona los archivos relevantes afectados
+    * Si no se identifica ningún problema significativo, responde **únicamente** con: Sin retroalimentación
+    `;
+  } else {
+    instructions = prompt;
+  }
+
+  try {
+    let choices: any;
+    let response: any;
+
+    if (tokenMax === undefined || tokenMax === '') {
+      tokenMax = '500'; // Mayor límite para PR completo
+      console.log(`tokenMax fuera de los parámetros, para revisión completa fue establecido en 500.`);
+    }
+    if (temperature === undefined || temperature === '' || parseInt(temperature) > 2) {
+      temperature = '0';
+      console.log(`temperatura fuera de los parámetros, para proseguir con la tarea fue establecida en 0.`);
+    }
+
+    try {
+      const request = await fetch(aoiEndpoint, {
+        method: 'POST',
+        headers: { 'api-key': `${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          max_tokens: parseInt(`${tokenMax}`),
+          temperature: parseInt(`${temperature}`),
+          messages: [
+            {
+              role: 'user',
+              content: `${instructions}\n\nPR #${prNumber} - Cambios completos:\n${fullPRDiff}`,
+            },
+          ],
+        }),
+      });
+
+      response = await request.json();
+      choices = response.choices;
+    } catch (responseError: any) {
+      console.log(
+        `Error encontrado en la revisión del PR completo, validar los parámetros de entrada. ${responseError.response?.status} ${responseError.response?.message}`,
+      );
+      return;
+    }
+
+    if (choices && choices.length > 0) {
+      const reviewOK = choices[0].message?.content as string;
+      if (reviewOK.trim() !== 'Sin retroalimentación') {
+        // Agregar comentario general al PR (no a un archivo específico)
+        await addCommentToPR(`**Revisión Completa del PR #${prNumber}**`, reviewOK, agent);
+      }
+      console.log(`Revisión completa del PR #${prNumber} finalizada.`);
+    } else {
+      console.log(`Ninguna retroalimentación encontrada para el PR #${prNumber} completo.`);
+    }
+
+    // Captura de tokens para revisión completa
+    try {
+      const completion_tokens_total = response.usage.completion_tokens;
+      const prompt_tokens_total = response.usage.prompt_tokens;
+      const total_tokens_total = response.usage.total_tokens;
+
+      const prConsumeApi = `PR #${prNumber} - Uso: Completaciones: ${completion_tokens_total}, Prompts: ${prompt_tokens_total}, Total: ${total_tokens_total}`;
+      console.log(prConsumeApi);
+      
+      // Agregar al consumo global si existe
+      if (consumeApi) {
+        consumeApi += `\n${prConsumeApi}`;
+      } else {
+        consumeApi = prConsumeApi;
+      }
+    } catch (error: any) {
+      console.log(`Error al intentar capturar consumo de tokens del PR completo: ${error.message}`);
+    }
+  } catch (error: any) {
+    if (error.response) {
+      console.log(`Error en revisión completa del PR: ${error.response.status}`);
+      console.log(error.response.data);
+    } else {
+      console.log(`Error en revisión completa del PR: ${error.message}`);
+    }
+  }
+}

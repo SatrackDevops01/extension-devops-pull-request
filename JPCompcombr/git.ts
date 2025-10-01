@@ -23,3 +23,20 @@ export async function getChangedFiles(targetBranch: string) {
 
   return nonBinaryFiles;
 }
+
+export async function getFullPRDiff(prNumber: string): Promise<string> {
+  try {
+    // Obtener el diff completo del PR usando git
+    // Esto puede variar dependiendo de cómo manejes los PRs en tu sistema
+    const { execSync } = require('child_process');
+    
+    // Ejemplo para GitHub PR (ajusta según tu plataforma)
+    const diffCommand = `git fetch origin pull/${prNumber}/head && git diff HEAD..FETCH_HEAD`;
+    const fullDiff = execSync(diffCommand, { encoding: 'utf-8' });
+    
+    return fullDiff;
+  } catch (error: any) {
+    console.log(`Error obteniendo diff completo del PR #${prNumber}: ${error.message}`);
+    return '';
+  }
+}

@@ -1,10 +1,10 @@
 import * as tl from "azure-pipelines-task-lib/task";
 import { Configuration, OpenAIApi } from 'openai';
 import { deleteExistingComments } from './pr';
-import { reviewFile } from './review';
+import { reviewFile, reviewCompletePR } from './review';
 import { consumeApi } from './review';
 import { getTargetBranchName } from './utils';
-import { getChangedFiles } from './git';
+import { getChangedFiles, getFullPRDiff } from './git';
 import * as https from 'https';
 import * as http from 'http';
 import { Repository } from './repository';
@@ -74,27 +74,42 @@ async function run() {
 
     console.log(`Se detectaron cambios en ${filesToReview.length} archivo(s)`);
 
-    for (const element of filesToReview) {
+    if(analysisMode === 'global') {
+      const prNumber = tl.getVariable('System.PullRequest.PullRequestNumber') || '';
+      const fullPRDiff = await getFullPRDiff(prNumber);
+      let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
 
-      const fileToReview = element;
-      let diff = await _repository.GetDiff(fileToReview);
-      let review = await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
 
-      if (diff.indexOf('Sem feedback') < 0) {
-        await pr_1.addCommentToPR(fileToReview, review, Agent);
-      }
 
-      console.log(`Revisao finalizada do arquivo ${fileToReview}`)
-      //gerar um console.log com o cosumo de tokens o consumo esta na variavel consumeApi gerada no arquivo review.ts
+      console.log(`Revision finalizada del pr ${prNumber}`)
+      // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
       console.log(`----------------------------------`)
       console.log(`Consumo de Tokens: ${consumeApi}`)
       console.log(`----------------------------------`)
-    }
+    } else if (analysisMode === 'file') {
+      for (const element of filesToReview) {
 
+        const fileToReview = element;
+        let diff = await _repository.GetDiff(fileToReview);
+        let review = await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
+
+        if (diff.indexOf('Sin retroalimentación') < 0) {
+          await pr_1.addCommentToPR(fileToReview, review, Agent);
+        }
+
+        console.log(`Revision finalizada del archivo ${fileToReview}`)
+        // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
+        console.log(`----------------------------------`)
+        console.log(`Consumo de Tokens: ${consumeApi}`)
+        console.log(`----------------------------------`)
+      }
+    } else {
+      tl.setResult(tl.TaskResult.Failed, `Modo de análisis desconocido: ${analysisMode}`);
+    }
     console.log("Task de Pull Request finalizada.");
   }
   catch (err: any) {
-    console.log("Encontrado erro", err.message);
+    console.log("Error encontrado", err.message);
     console.log(tl.TaskResult.Failed, err.message);
     tl.setResult(tl.TaskResult.Failed, err.message);
   }
