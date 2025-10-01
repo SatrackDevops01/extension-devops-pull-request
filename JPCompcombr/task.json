@@ -1,10 +1,10 @@
 {
   "id": "2572887e-809d-43b4-bab7-baaad9c8ec87",
   "name": "JPCompcombr",
-  "friendlyName": "Revisao de PullRequest by AzureOpenAI",
-  "description": "Esta tarefa usa o modelo AzureOpenAi para revisar PullRequests",
-  "author": "Joao Antunes",
-  "helpMarkDown": "[Mais informacoes](https://github.com/jpitapeva/extensao-devops-pull-request)",
+  "friendlyName": "Revision de PullRequest por AzureOpenAI",
+  "description": "Esta tarea utiliza el modelo AzureOpenAi para revisar PullRequests",
+  "author": "Joao Antunes & Juan Camilo Marin",
+  "helpMarkDown": "[Mas informacion](https://github.com/jpitapeva/extensao-devops-pull-request)",
   "category": "Utility",
   "visibility": [
     "Build"
@@ -35,15 +35,15 @@
       "label": "Api key",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "Api key do Azure OpenAI."
+      "helpMarkDown": "Api key de Azure OpenAI."
     },
     {
       "name": "aoi_endpoint",
       "type": "string",
-      "label": "Endpoint do Azure OpenAI",
+      "label": "Endpoint de Azure OpenAI",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "Endpoint do Azure OpenAI. (required)"
+      "helpMarkDown": "Endpoint de Azure OpenAI. (required)"
     },
     {
       "name": "aoi_tokenMax",
@@ -51,15 +51,15 @@
       "label": "Azure Max Token",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "O numero maximo de tokens a serem gerados na conclusao. A contagem de tokens da sua solicitacao mais max_tokens nao pode exceder o tamanho do contexto do modelo. (required)"
+      "helpMarkDown": "El número máximo de tokens a generar en la conclusión. El conteo de tokens de tu solicitud más max_tokens no puede exceder el tamaño del contexto del modelo. (requerido)"
     },
     {
       "name": "aoi_temperature",
       "type": "string",
-      "label": "Temperatura de amostragem usar, entre 0 e 2.",
+      "label": "Temperatura de muestreo, usar entre 0 y 2.",
       "defaultValue": "0",
       "required": true,
-      "helpMarkDown": "Temperatura de amostragem, usar entre 0 e 2. Valores mais altos significam que o modelo corre mais riscos. Experimente 0.9 para aplicativos mais criativos e 0 para aqueles com uma resposta bem definida. (required)"
+      "helpMarkDown": "Temperatura de muestreo, usar entre 0 y 2. Valores más altos significan que el modelo toma más riesgos. Prueba 0.9 para aplicaciones más creativas y 0 para aquellas con una respuesta bien definida. (requerido)"
     },
     {
       "name": "prompt",
@@ -67,7 +67,7 @@
       "label": "prompt",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Especifique seu prompt. Se desejar voce pode criar o seu proprio prompt. Exemplo. Atue como revisor de código de uma solicitação de pull, fornecendo feedback sobre possíveis bugs e problemas de código limpo.\nVocê recebe as alterações da solicitação de pull em um formato de patch.\nCada entrada de patch tem a mensagem de confirmação na linha de assunto, seguida pelas alterações de código (diffs) em um formato unidiff.\n\nComo revisor de código, sua tarefa é:\n- Revisar apenas as linhas adicionadas, editadas ou excluídas.\n- Se não houver bugs e as alterações estiverem corretas, escreva apenas 'Sem feedback'.\n- Se houver bugs ou alterações de código incorretas, não escreva 'Sem feedback'."
+      "helpMarkDown": "Especifique su prompt. Si lo desea, puede crear su propio prompt. Ejemplo: Actúe como revisor de código de una solicitud de pull, proporcionando retroalimentación sobre posibles errores y problemas de código limpio.\nRecibirá los cambios de la solicitud de pull en formato de patch.\nCada entrada de patch tiene el mensaje de confirmación en la línea de asunto, seguido por los cambios de código (diffs) en formato unidiff.\n\nComo revisor de código, su tarea es:\n- Revisar solo las líneas añadidas, editadas o eliminadas.\n- Si no hay errores y los cambios son correctos, escriba solo 'Sin comentarios'.\n- Si hay errores o cambios de código incorrectos, no escriba 'Sin comentarios'."
     },
     {
       "name": "additional_prompts",
@@ -75,23 +75,23 @@
       "label": "Additional Prompts",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Especifique seu prompt adicional separado por virgula."
+      "helpMarkDown": "Especifique su prompt adicional separado por comas."
     },
     {
       "name": "file_extensions",
       "type": "string",
-      "label": "File Extensions",
+      "label": "Extensiones de archivo",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Especifique uma lista separada por virgulas de extensoes de arquivo para as quais você deseja executar uma revisao de codigo. Essa entrada ajuda a restringir o escopo da revisao de codigo para tipos de arquivo especificos.\n\n**Exemplo:**\n```plaintext\n\".js,.ts,.css,.html\"\n```\n\nCertifique-se de fornecer as extensões dos arquivos sem espacos após as virgulas."
+      "helpMarkDown": "Especifique una lista separada por comas de extensiones de archivo para las cuales desea ejecutar una revisión de código. Esta entrada ayuda a restringir el alcance de la revisión de código a tipos de archivo específicos.\n\n**Ejemplo:**\n```plaintext\n\".js,.ts,.css,.html\"\n```\n\nAsegúrese de proporcionar las extensiones de los archivos sin espacios después de las comas."
     },
     {
       "name": "file_excludes",
       "type": "string",
-      "label": "Files to exclude",
+      "label": "Archivos a excluir",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "## Arquivos a serem excluidos da configuracao\n\n### Descricao\nEspecifique uma lista separada por virgulas de nomes de arquivos que devem ser excluidos das revisoes de codigo. Isso é util para excluir arquivos confidenciais ou impedir que determinados arquivos sejam revisados.\n\n### Formato\nForneca uma lista de nomes de arquivos separados por virgulas. Por exemplo: `file1.js, file2.py, secret.txt`\n\n### Valor padrao\nSe nenhum arquivo for especificado, todos os arquivos serao considerados para revisao de codigo por padrao."
+      "helpMarkDown": "## Archivos a excluir de la configuración\n\n### Descripción\nEspecifique una lista separada por comas de nombres de archivos que deben excluirse de las revisiones de código. Esto es útil para excluir archivos confidenciales o impedir que determinados archivos sean revisados.\n\n### Formato\nProporcione una lista de nombres de archivos separados por comas. Por ejemplo: `file1.js, file2.py, secret.txt`\n\n### Valor predeterminado\nSi no se especifica ningún archivo, todos los archivos serán considerados para revisión de código por defecto."
     },
     {
       "name": "use_https",
