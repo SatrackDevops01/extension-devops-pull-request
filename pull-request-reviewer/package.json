@@ -1,10 +1,11 @@
 {
-  "name": "JPCompcombr",
+  "name": "pull-request-reviewer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "package": "tfx extension create --manifest-globs vss-extension.json"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
     "@types/minimatch": "^5.1.2",
     "@types/node": "^18.15.3",
     "@types/node-fetch": "^2.6.4",
-    "@types/q": "^1.5.5"
+    "@types/q": "^1.5.5",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,9 +1,9 @@
 {
     "manifestVersion": 1,
-    "id": "JPCompcombr",
-    "name": "JPCompcombr",
-    "version": "26.0.0",
-    "publisher": "JPCompcombr",
+    "id": "pull-request-reviewer",
+    "name": "pull-request-reviewer",
+    "version": "1.0.0",
+    "publisher": "SatrackSAS",
     "galleryFlags": [
         "Public",
         "Preview"
@@ -13,7 +13,7 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],    
-    "description": "Esta tarefa usa o modelo AzureOpenAI para revisar PullRequests",
+    "description": "Esta tarea usa un modelo de AzureOpenAI para revisar PullRequests",
     "categories": [
         "Azure Pipelines"
     ],
@@ -29,12 +29,12 @@
     ],
     "files": [
         {
-            "path": "JPCompcombr"
+            "path": "pull-request-reviewer"
         }
     ],
     "repository" : {
         "type" : "git",
-        "uri" : "https://github.com/jpitapeva/extensao-devops-pull-request"
+        "uri" : "https://github.com/SatrackDevops01/extension-devops-pull-request"
     },
     "content": {
         "details": {
@@ -43,13 +43,13 @@
     },
     "contributions": [
         {
-            "id": "JPCompcombr",
+            "id": "pull-request-reviewer",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "JPCompcombr"
+                "name": "pull-request-reviewer"
             }
         }
     ]

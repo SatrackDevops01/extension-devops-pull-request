@@ -1,22 +1,22 @@
 {
-  "id": "2572887e-809d-43b4-bab7-baaad9c8ec87",
-  "name": "JPCompcombr",
+  "id": "2d853c7a-e888-46c2-9fd0-5b4e55520d63",
+  "name": "pull-request-reviewer",
   "friendlyName": "Revision de PullRequest por AzureOpenAI",
   "description": "Esta tarea utiliza el modelo AzureOpenAi para revisar PullRequests",
-  "author": "Joao Antunes & Juan Camilo Marin",
-  "helpMarkDown": "[Mas informacion](https://github.com/jpitapeva/extensao-devops-pull-request)",
+  "author": "SatrackSAS",
+  "helpMarkDown": "[Mas informacion](https://github.com/SatrackDevops01/extension-devops-pull-request)",
   "category": "Utility",
   "visibility": [
     "Build"
   ],
   "demands": [],
   "version": {
-    "Major": "26",
+    "Major": "1",
     "Minor": "0",
     "Patch": "0"
   },
   "minimumAgentVersion": "1.95.0",
-  "instanceNameFormat": "JPCompcombr $(message)",
+  "instanceNameFormat": "pull-request-reviewer $(message)",
   "inputs": [
     {
       "name": "analysis_mode",
