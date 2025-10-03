@@ -64,6 +64,10 @@ async function run() {
 
     console.log('Iniciando Code Review');
 
+    console.log(`PullRequestId: ${tl.getVariable('System.PullRequest.PullRequestId')}`);
+    console.log(`TargetBranch: ${tl.getVariable('System.PullRequest.TargetBranch')}`);
+    console.log(`SourceBranch: ${tl.getVariable('System.PullRequest.SourceBranch')}`);
+
     let filesToReview = await _repository.GetChangedFiles(fileExtensions, filesToExclude);
     if (filesToReview.length === 0 || filesToReview.length == 0) {
       let message = `No se encontró código sujeto a revisión. Sin comentarios para revisión de código o revise los parámetros de entrada de la tarea.`
@@ -75,12 +79,17 @@ async function run() {
     console.log(`Se detectaron cambios en ${filesToReview.length} archivo(s)`);
 
     if(analysisMode === 'global') {
-      const prNumber = tl.getVariable('System.PullRequest.PullRequestNumber') || '';
+      const prNumber = tl.getVariable('System.PullRequest.PullRequestId');
+      
+      if (!prNumber || prNumber.trim() === '') {
+        const message = 'No se pudo obtener el número del Pull Request. Verifique que la tarea se esté ejecutando en el contexto de un PR.';
+        console.log(message);
+        tl.setResult(tl.TaskResult.Failed, message);
+        return;
+      }
+      
       const fullPRDiff = await getFullPRDiff(prNumber);
       let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
-
-
-
       console.log(`Revision finalizada del pr ${prNumber}`)
       // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
       console.log(`----------------------------------`)

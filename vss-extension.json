@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "pull-request-reviewer",
     "name": "pull-request-reviewer",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "publisher": "SatrackSAS",
     "galleryFlags": [
         "Public",

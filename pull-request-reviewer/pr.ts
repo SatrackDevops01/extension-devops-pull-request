@@ -69,7 +69,7 @@ export async function deleteExistingComments(agent: http.Agent | https.Agent) {
     }
   }
 
-  console.log("Deletando comentarios pre existentes...");
+  console.log("Eliminando comentarios pre existentes...");
 }
 
 function getCollectionName(collectionUri: string) {
