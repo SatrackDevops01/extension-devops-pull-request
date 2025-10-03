@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p .",
-    "package": "tfx extension create --manifest-globs vss-extension.json"
+    "package": "tfx extension create --manifest-globs ../vss-extension.json"
   },
   "keywords": [],
   "author": "",
