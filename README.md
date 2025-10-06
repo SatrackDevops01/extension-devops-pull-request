@@ -1,27 +1,33 @@
-# Use o modelo OpenAI GPT para revisar solicitações pull para Azure Devops
-Task do Azure DevOps que adiciona comentários em portugues nas solicitações de PullRequest com a ajuda do ChatGPT.
+# Uso de modelo OpenAI GPT para revisar pull requests (PR) en Azure DevOps
 
-## Instalação
-A instalação da task pode ser feita usando o [Visual Studio MarketPlace](https://marketplace.visualstudio.com/publishers/jpcompcombr).
+Tarea de Azure DevOps que agrega comentarios a las solicitudes de Pull Request con la ayuda de GPT.
 
-## Serviço Azure Open AI
-A formatação do endpoint é a seguinte: https://{XXXXXXXX}.openai.azure.com/openai/deployments/{MODEL_NAME}/chat/completions?api-version={API_VERSION}
+## Instalación
 
-[Documentação API REST](https://learn.microsoft.com/pt-br/azure/ai-services/openai/reference).
+La instalación se puede realizar utilizando el [Visual Studio MarketPlace](https://marketplace.visualstudio.com/items?itemName=SatrackSAS.pull-request-reviewer).
 
-### Dê permissão ao agente de serviço de build
-Antes de usar esta task, certifique-se de que o serviço de build tenha permissões para contribuir em seu REPOSITORIO:
+## Servicio Azure Open AI
 
-![contribute_to_pr](https://github.com/jpitapeva/extensao-devops-pull-request/blob/main/images/contribute_to_pr.png?raw=true)
+El formato del endpoint es el siguiente: https://{XXXXXXXX}.openai.azure.com/openai/deployments/{MODEL_NAME}/chat/completions?api-version={API_VERSION}
 
-### Permitir que a tarefa acesse o token do sistema
-Adicione uma seção de checkout com persistCredentials definido como true.
+[Documentacion API REST](https://learn.microsoft.com/es-mx/azure/ai-foundry/openai/reference).
+
+### Da permiso al agente de servicio de compilación
+
+Antes de usar esta task, verifique de que el servicio de compilación tenga permisos para contribuir en su REPOSITORIO:
+
+![contribute_to_pr](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/contribute_to_pr.png?raw=true)
+
+### Permitir que la tarea acceda al token del sistema
+
+Agregue una sección de checkout con persistCredentials establecido en true.
 
 #### Pipelines Yaml
+
 ```yaml
 jobs:
 - job:
-  displayName: "JPCompcombr code review"
+  displayName: "code review"
   pool:
     vmImage: ubuntu-latest 
  
@@ -29,51 +35,25 @@ jobs:
   - checkout: self
     persistCredentials: true
 
-  - task: JPCompcombr@26
+  - task: pull-request-reviewer@1
     displayName: GPTPullRequestReview
     inputs:
-      api_key: 'YOUR_TOKEN'
-      model: 'gpt-4'
+      api_key: 'TU_TOKEN'
+      model: 'gpt-4o-mini' # Puede ser cualquier modelo
       aoi_endpoint: 'https://{XXXXXXXX}.azure.com/openai/deployments/{MODEL_NAME}/chat/completions?api-version={API_VERSION}'
       aoi_tokenMax: 1000
       aoi_temperature: 0
       use_https: true
-      prompt: 'Opcional. Se desejar agora voce pode criar o seu proprio prompt, exemplo. Atue como revisor de código de uma solicitação de pull, fornecendo feedback sobre possíveis bugs e problemas de código limpo.\nVocê recebe as alterações da solicitação de pull em um formato de patch.\nCada entrada de patch tem a mensagem de confirmação na linha de assunto, seguida pelas alterações de código (diffs) em um formato unidiff.\n\nComo revisor de código, sua tarefa é:\n- Revisar apenas as linhas adicionadas, editadas ou excluídas.\n- Se não houver bugs e as alterações estiverem corretas, escreva apenas 'Sem feedback'.\n- Se houver bugs ou alterações de código incorretas, não escreva 'Sem feedback'.'
+      prompt: 'Opcional. Ahora, si lo deseas, puedes crear tu propio prompt, por ejemplo: Actúa como revisor de código de una solicitud de pull, proporcionando retroalimentación sobre posibles errores y problemas de buenas prácticas de código.\nRecibirás los cambios de la solicitud de pull en formato patch.\nCada entrada de patch tiene el mensaje de confirmación en la línea de asunto, seguido por los cambios de código (diffs) en formato unidiff.\n\nComo revisor de código, tu tarea es:\n- Revisar solo las líneas añadidas, editadas o eliminadas.\n- Si no hay errores y los cambios son correctos, escribe únicamente 'Sin comentarios'.\n- Si hay errores o cambios de código incorrectos, no escribas 'Sin comentarios'.'
       file_excludes: 'file1.js,file2.py,secret.txt,*.csproj,src/**/*.csproj'
-      additional_prompts: 'Opcional. Prompt adicional separado por virgula, exemplo: corrija a nomenclatura de variaveis, garanta identacao consistente, revise a abordagem de tratamento de erros'
+      additional_prompts: 'Opcional. Prompt adicional separado por coma, ejemplo: corrige la nomenclatura de variables, garantiza indentación consistente, revisa el enfoque de manejo de errores',
+      analysis_mode: 'file' o 'global' # Requerido, modo de analisis que genera un feedback por archivo o un feedback global respectivamente
 ```
 
 ## License
+
 [MIT](https://raw.githubusercontent.com/mlarhrouch/azure-pipeline-gpt-pr-review/main/LICENSE)
 
-## Developer plugin Steps</br>
-Into folder project, run command:  ```npm run build``` </br>
-Bump version in vss-extension.json and task.json</br>
-Run command for generate new package: ```npx tfx-cli extension create```</br>
-Upload extension to marketplace: https://marketplace.visualstudio.com/manage/a</br>
+## Plus
 
-## GPT (transformador pré-treinado gerativo)
-
-## O que é a engenharia de prompts
-Os modelos de IA generativa são treinados em grandes quantidades de dados e podem gerar texto, imagens, código e conteúdo criativo com base na continuação mais provável do prompt.
-
-Engenharia de prompt é o processo de criação e otimização de prompts para utilizar melhor os modelos de IA. A criação de prompts eficazes é fundamental para o sucesso da engenharia de prompt e pode aprimorar significativamente o desempenho do modelo de IA em tarefas específicas. Fornecer prompts relevantes, específicos, inequívocos e bem estruturados pode ajudar o modelo a entender melhor o contexto e gerar respostas mais precisas.
-
-Por exemplo, se quisermos que um modelo de OpenAI gere descrições de produto, poderemos fornecer uma descrição detalhada que descreve os recursos e os benefícios do produto. Quando esse contexto é fornecido, o modelo pode gerar descrições de produto mais precisas e relevantes.
-
-A engenharia de prompt também pode ajudar a reduzir o viés e a aumentar a imparcialidade em modelos de IA. Ao criar prompts diversos e inclusivos, podemos garantir que o modelo não seja tendencioso em relação a um determinado grupo ou perspectiva.
-
-## Curl
-```
-curl https://YOUR_ENDPOINT_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-03-15-preview \
-  -H "Content-Type: application/json" \
-  -H "api-key: YOUR_API_KEY" \
-  -d '{"messages":[{"role": "system", "content": "You are a helpful assistant, teaching people about AI."},
-{"role": "user", "content": "Does Azure OpenAI support multiple languages?"},
-{"role": "assistant", "content": "Yes, Azure OpenAI supports several languages, and can translate between them."},
-{"role": "user", "content": "Do other Azure AI Services support translation too?"}]}'
-```
-
-
-### Author: Joao Paulo Moreira Antunes (https://www.jpcomp.com.br/)</br>
-
+[Devops Publish](https://learn.microsoft.com/en-us/azure/devops/extend/publish/overview?view=azure-devops)
