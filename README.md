@@ -24,6 +24,8 @@ Agregue una sección de checkout con persistCredentials establecido en true.
 
 #### Pipelines Yaml
 
+Se debe crear un pipeline usando el siguiente yaml:
+
 ```yaml
 jobs:
 - job:
@@ -49,6 +51,21 @@ jobs:
       additional_prompts: 'Opcional. Prompt adicional separado por coma, ejemplo: corrige la nomenclatura de variables, garantiza indentación consistente, revisa el enfoque de manejo de errores',
       analysis_mode: 'file' o 'global' # Requerido, modo de analisis que genera un feedback por archivo o un feedback global respectivamente
 ```
+
+Luego, en la rama donde se desea ejecutar la tarea, se debe agregar en la seccion de build validation, la ejecucion del pipeline creado, asi:
+
+- En DevOps, editar politicas de rama
+![rama](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_1.png?raw=true)
+
+- En la seccion build validation, agregar policie:
+![build_validation](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_2.png?raw=true)
+
+- Seleccionar el pipeline creado:
+![select_pipeline](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_3.png?raw=true)
+
+### Nota
+
+Se deben solucionar primero conflictos en el repo si los hay para que se ejecute el pipeline.
 
 ## License
 
