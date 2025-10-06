@@ -1,10 +1,9 @@
 import * as tl from "azure-pipelines-task-lib/task";
 import { SimpleGit, SimpleGitOptions, simpleGit } from "simple-git";
-import binaryExtensions from "./binaryExtensions.json";
-import  minimatch  from "minimatch";
+import binaryExtensions from "../../config/binaryExtensions.json";
+import { minimatch } from "minimatch";
 
 export class Repository {
-
     private gitOptions: Partial<SimpleGitOptions> = {
         baseDir: `${tl.getVariable('System.DefaultWorkingDirectory')}`,
         binary: 'git'
@@ -36,7 +35,6 @@ export class Repository {
             let patternsToExclude = filesToExclude.trim().split(',');
             filesToReview = filesToReview.filter(file => !patternsToExclude.some(pattern => minimatch(file, pattern)));
         }
-
 
         return filesToReview;
     }

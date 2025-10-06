@@ -27,7 +27,6 @@ export async function addCommentToPR(fileName: string, comment: string, agent: h
     agent: agent
   });
 
-
   if (response.ok === true) {
     console.log(`Novo comentario adicionado.`);
   }
