@@ -55,12 +55,15 @@ jobs:
 Luego, en la rama donde se desea ejecutar la tarea, se debe agregar en la seccion de build validation, la ejecucion del pipeline creado, asi:
 
 - En DevOps, editar politicas de rama
+
 ![rama](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_1.png?raw=true)
 
 - En la seccion build validation, agregar policie:
+
 ![build_validation](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_2.png?raw=true)
 
 - Seleccionar el pipeline creado:
+
 ![select_pipeline](https://github.com/SatrackDevops01/extension-devops-pull-request/blob/main/images/branch_policies_3.png?raw=true)
 
 ### Nota
