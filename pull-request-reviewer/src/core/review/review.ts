@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
-import { git } from './git';
-import { addCommentToPR } from './pr';
+import { git } from '../git';
+import { addCommentToPR } from '../../services/pr';
 import * as https from 'https';
 import * as http from 'http';
 
 export let consumeApi: string;
+
 export async function reviewFile(
   gitDiff: string,
   fileName: string,
@@ -18,9 +19,9 @@ export async function reviewFile(
 ) {
   console.log(`Iniciando revision del archivo: ${fileName} ...`);
 
-  let instructions : string;
-if(prompt === null ||  prompt === '' || prompt === undefined) {
-  instructions = `
+  let instructions: string;
+  if (prompt === null || prompt === '' || prompt === undefined) {
+    instructions = `
   Eres un asistente especializado en ingeniería de software, actuando como revisor de código para Pull Requests (PRs).
 
   **Objetivo Principal:**
@@ -78,10 +79,9 @@ if(prompt === null ||  prompt === '' || prompt === undefined) {
   * Para cada punto, indica el archivo y la línea relevante, si es aplicable.
   * Si no se identifica ningún problema o punto de mejora en *ninguno* de los criterios, responde **únicamente** con la frase: Sin retroalimentación
   `;
-}
-else {  
-  instructions = prompt;
-}
+  } else {
+    instructions = prompt;
+  }
 
   try {
     let choices: any;
@@ -113,7 +113,6 @@ else {
       });
 
       response = await request.json();
-
       choices = response.choices;
     } catch (responseError: any) {
       console.log(
@@ -122,16 +121,16 @@ else {
     }
 
     if (choices && choices.length > 0) {
-        const reviewOK = choices[0].message?.content as string;
-        if (reviewOK.trim() !== 'Sin retroalimentación') {
-          await addCommentToPR(fileName, reviewOK, agent);
-        }
-        console.log(`Revision del archivo ${fileName} finalizada.`);
+      const reviewOK = choices[0].message?.content as string;
+      if (reviewOK.trim() !== 'Sin retroalimentación') {
+        await addCommentToPR(fileName, reviewOK, agent);
+      }
+      console.log(`Revision del archivo ${fileName} finalizada.`);
     } else {
       console.log(`Ninguna retroalimentación encontrada para el archivo ${fileName}.`);
     }
-    // Captura o consumo de tokens
 
+    // Captura o consumo de tokens
     try {
       const completion_tokens_total = response.usage.completion_tokens;
       const prompt_tokens_total = response.usage.prompt_tokens;
@@ -292,7 +291,7 @@ export async function reviewCompletePR(
 
       const prConsumeApi = `PR #${prNumber} - Uso: Completaciones: ${completion_tokens_total}, Prompts: ${prompt_tokens_total}, Total: ${total_tokens_total}`;
       console.log(prConsumeApi);
-      
+
       // Agregar al consumo global si existe
       if (consumeApi) {
         consumeApi += `\n${prConsumeApi}`;

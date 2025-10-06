@@ -1,10 +1,10 @@
 import * as tl from "azure-pipelines-task-lib/task";
 
-export function getFileExtension(fileName: string) {
+export function getFileExtension(fileName: string): string {
   return fileName.slice((fileName.lastIndexOf(".") - 1 >>> 0) + 2);
 }
 
-export function getTargetBranchName() {
+export function getTargetBranchName(): string | undefined {
   let targetBranchName = tl.getVariable('System.PullRequest.TargetBranchName');
 
   if (!targetBranchName) {
@@ -17,5 +17,3 @@ export function getTargetBranchName() {
 
   return `origin/${targetBranchName}`;
 }
-
-//npx tfx-cli extension create

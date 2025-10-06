@@ -1,7 +1,7 @@
 import { SimpleGitOptions, SimpleGit, simpleGit } from 'simple-git';
 import * as tl from "azure-pipelines-task-lib/task";
 import binaryExtensions from 'binary-extensions';
-import { getFileExtension } from './utils';
+import { getFileExtension } from '../../utils';
 
 const gitOptions: Partial<SimpleGitOptions> = {
   baseDir: `${tl.getVariable('System.DefaultWorkingDirectory')}`,
@@ -10,7 +10,7 @@ const gitOptions: Partial<SimpleGitOptions> = {
 
 export const git: SimpleGit = simpleGit(gitOptions);
 
-export async function getChangedFiles(targetBranch: string) {
+export async function getChangedFiles(targetBranch: string): Promise<string[]> {
   await git.addConfig('core.pager', 'cat');
   await git.addConfig('core.quotepath', 'false');
   await git.fetch();

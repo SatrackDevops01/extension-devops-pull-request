@@ -1,14 +1,13 @@
 import * as tl from "azure-pipelines-task-lib/task";
 import { Configuration, OpenAIApi } from 'openai';
-import { deleteExistingComments } from './pr';
-import { reviewFile, reviewCompletePR } from './review';
-import { consumeApi } from './review';
+import { deleteExistingComments, addCommentToPR } from './services/pr';
+import { reviewFile, reviewCompletePR, consumeApi } from './core/review';
 import { getTargetBranchName } from './utils';
-import { getChangedFiles, getFullPRDiff } from './git';
+import { getChangedFiles, getFullPRDiff } from './core/git';
 import * as https from 'https';
 import * as http from 'http';
-import { Repository } from './repository';
-import minimatch from 'minimatch';
+import { Repository } from './core/repository';
+import { minimatch } from 'minimatch';
 
 async function run() {
   try {
@@ -16,11 +15,9 @@ async function run() {
       tl.setResult(tl.TaskResult.Skipped, "Esta tarea debe ejecutarse solo cuando la compilación sea activada a través de una solicitud de PR.");
       return;
     }
-    
+
     const analysisMode = tl.getInput('analysis_mode', true) as 'file' | 'global';
     const _repository = new Repository();
-    const pr_1 = require("./pr");
-    const reviewTs = require("./review");
     const supportSelfSignedCertificate = tl.getBoolInput('support_self_signed_certificate');
     const apiKey = tl.getInput('api_key', true);
     const aoiEndpoint = tl.getInput('aoi_endpoint', true);
@@ -42,7 +39,7 @@ async function run() {
       tl.setResult(tl.TaskResult.Failed, 'No Endpoint AzureOpenAi provided!');
       return;
     }
-    
+
     let Agent: http.Agent | https.Agent;
 
     if(useHttps) {
@@ -80,14 +77,14 @@ async function run() {
 
     if(analysisMode === 'global') {
       const prNumber = tl.getVariable('System.PullRequest.PullRequestId');
-      
+
       if (!prNumber || prNumber.trim() === '') {
         const message = 'No se pudo obtener el número del Pull Request. Verifique que la tarea se esté ejecutando en el contexto de un PR.';
         console.log(message);
         tl.setResult(tl.TaskResult.Failed, message);
         return;
       }
-      
+
       const fullPRDiff = await getFullPRDiff(prNumber);
       let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
       console.log(`Revision finalizada del pr ${prNumber}`)
@@ -100,11 +97,7 @@ async function run() {
 
         const fileToReview = element;
         let diff = await _repository.GetDiff(fileToReview);
-        let review = await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
-
-        if (diff.indexOf('Sin retroalimentación') < 0) {
-          await pr_1.addCommentToPR(fileToReview, review, Agent);
-        }
+        await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
 
         console.log(`Revision finalizada del archivo ${fileToReview}`)
         // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
@@ -125,3 +118,20 @@ async function run() {
 }
 
 run();
+
+// Core modules exports (for library usage)
+export * from './core/git';
+export * from './core/repository';
+export * from './core/review';
+
+// Services exports
+export * from './services/pr';
+
+// Utils exports
+export * from './utils';
+
+// Types exports
+export * from './types';
+
+// Config exports
+export * from './config';
