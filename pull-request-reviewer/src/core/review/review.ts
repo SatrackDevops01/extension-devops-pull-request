@@ -106,13 +106,16 @@ export async function reviewFile(
           messages: [
             {
               role: 'user',
-              content: `${instructions}\n, patch : ${gitDiff}}`,
+              content: `${instructions}\n, patch : ${gitDiff}`,
             },
           ],
         }),
       });
 
+      console.log("Model request: ", request);
+
       response = await request.json();
+      console.log("Model Response: ", response);
       choices = response.choices;
     } catch (responseError: any) {
       console.log(
@@ -257,13 +260,16 @@ export async function reviewCompletePR(
           messages: [
             {
               role: 'user',
-              content: `${instructions}\n\nPR #${prNumber} - Cambios completos:\n${fullPRDiff}`,
+              content: `${instructions}\n, patch : ${fullPRDiff}`,
             },
           ],
         }),
       });
 
+      console.log("Model request: ", request);
+
       response = await request.json();
+      console.log("Model Response: ", response);
       choices = response.choices;
     } catch (responseError: any) {
       console.log(
