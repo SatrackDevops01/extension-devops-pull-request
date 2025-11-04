@@ -112,6 +112,7 @@ export async function reviewFile(
   temperature: string | undefined,
   prompt: string | undefined,
   additionalPrompts: string[] = [],
+  isNewModel: boolean = false,
 ) {
   console.log(`Iniciando revision del archivo: ${fileName} ...`);
 
@@ -200,8 +201,8 @@ export async function reviewFile(
     }
 
     const requestBody = {
-      max_tokens: parsedTokenMax,
-      temperature: parsedTemperature,
+      [isNewModel ? 'max_completion_tokens' : 'max_tokens']: parsedTokenMax,
+      temperature: parsedTemperature > 0 ? parsedTemperature : 1,
       messages: [
         {
           role: 'user',
@@ -256,6 +257,7 @@ export async function reviewCompletePR(
   tokenMax: string | undefined,
   temperature: string | undefined,
   prompt: string | undefined,
+  isNewModel: boolean,
   additionalPrompts: string[] = [],
 ) {
   console.log(`Iniciando revisión completa del PR #${prNumber} ...`);
@@ -359,8 +361,8 @@ export async function reviewCompletePR(
 
         try {
           const requestBody = {
-            max_tokens: Math.floor(parsedTokenMax / chunks.length) + 100, // Distribuir tokens
-            temperature: parsedTemperature,
+            [isNewModel ? 'max_completion_tokens' : 'max_tokens']: Math.floor(parsedTokenMax / chunks.length) + 100, // Distribuir tokens
+            temperature: parsedTemperature > 0 ? parsedTemperature : 1,
             messages: [
               {
                 role: 'user',
