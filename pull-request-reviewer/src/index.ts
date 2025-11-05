@@ -30,6 +30,10 @@ async function run() {
     const openaiModel = tl.getInput('model') || 'gpt-4-32k';
     const useHttps = tl.getBoolInput('use_https', true);
 
+    const isNewModel = openaiModel.includes('gpt-5');
+
+    console.log(`Modelo seleccionado: ${openaiModel}`);
+
     if (apiKey == undefined) {
       tl.setResult(tl.TaskResult.Failed, 'No Api Key provided!');
       return;
@@ -86,7 +90,7 @@ async function run() {
       }
 
       const fullPRDiff = await getFullPRDiff(prNumber);
-      let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
+      let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, isNewModel,additionalPrompts)
       console.log(`Revision finalizada del pr ${prNumber}`)
       // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
       console.log(`----------------------------------`)
@@ -97,7 +101,7 @@ async function run() {
 
         const fileToReview = element;
         let diff = await _repository.GetDiff(fileToReview);
-        await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts)
+        await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts, isNewModel)
 
         console.log(`Revision finalizada del archivo ${fileToReview}`)
         // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
