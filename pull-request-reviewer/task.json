@@ -12,8 +12,8 @@
   "demands": [],
   "version": {
     "Major": "1",
-    "Minor": "1",
-    "Patch": "9"
+    "Minor": "2",
+    "Patch": "1"
   },
   "minimumAgentVersion": "1.95.0",
   "instanceNameFormat": "pull-request-reviewer $(message)",
@@ -108,6 +108,20 @@
       "defaultValue": "true",
       "required": true,
       "helpMarkDown": "Select this option to support self-signed certificate."
+    },
+    {
+      "name": "reasoning_effort",
+      "type": "pickList",
+      "label": "Reasoning Effort (solo modelos de razonamiento)",
+      "defaultValue": "",
+      "required": false,
+      "options": {
+        "": "No aplicar (modelos estándar)",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "helpMarkDown": "Nivel de esfuerzo de razonamiento para modelos que lo soporten (ej. o1, o3). Déjelo vacío para modelos estándar."
     }
   ],
   "execution": {

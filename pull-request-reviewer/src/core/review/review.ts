@@ -73,7 +73,7 @@ async function makeRequestWithRetryAndDelay(
     const request = await fetch(aoiEndpoint, {
       method: 'POST',
       headers: { 
-        'api-key': `${apiKey}`, 
+        'Authorization': `Bearer ${apiKey}`, 
         'Content-Type': 'application/json' 
       },
       body: JSON.stringify(body),
@@ -112,7 +112,8 @@ export async function reviewFile(
   temperature: string | undefined,
   prompt: string | undefined,
   additionalPrompts: string[] = [],
-  isNewModel: boolean = false,
+  openaiModel: string = 'gpt-4o-mini',
+  reasoningEffort?: string,
 ) {
   console.log(`Iniciando revision del archivo: ${fileName} ...`);
 
@@ -200,9 +201,9 @@ export async function reviewFile(
       console.log(`temperatura fuera de los parámetros, para proseguir con la tarea fue establecida en 0.`);
     }
 
-    const requestBody = {
-      [isNewModel ? 'max_completion_tokens' : 'max_tokens']: parsedTokenMax,
-      temperature: parsedTemperature > 0 ? parsedTemperature : 1,
+    const requestBody: any = {
+      model: openaiModel,
+      max_completion_tokens: parsedTokenMax,
       messages: [
         {
           role: 'user',
@@ -210,6 +211,12 @@ export async function reviewFile(
         },
       ],
     };
+
+    if (reasoningEffort) {
+      requestBody.reasoning_effort = reasoningEffort;
+    } else {
+      requestBody.temperature = parsedTemperature;
+    }
 
     // Usar la nueva función con retry
     response = await makeRequestWithRetryAndDelay(aoiEndpoint, apiKey, requestBody, agent, 0);
@@ -257,8 +264,9 @@ export async function reviewCompletePR(
   tokenMax: string | undefined,
   temperature: string | undefined,
   prompt: string | undefined,
-  isNewModel: boolean,
+  openaiModel: string,
   additionalPrompts: string[] = [],
+  reasoningEffort?: string,
 ) {
   console.log(`Iniciando revisión completa del PR #${prNumber} ...`);
 
@@ -360,9 +368,9 @@ export async function reviewCompletePR(
         console.log(`Procesando chunk ${i + 1}/${chunks.length} (${chunkSizeKB.toFixed(2)} KB)...`);
 
         try {
-          const requestBody = {
-            [isNewModel ? 'max_completion_tokens' : 'max_tokens']: Math.floor(parsedTokenMax / chunks.length) + 100, // Distribuir tokens
-            temperature: parsedTemperature > 0 ? parsedTemperature : 1,
+          const requestBody: any = {
+            model: openaiModel,
+            max_completion_tokens: Math.floor(parsedTokenMax / chunks.length) + 100, // Distribuir tokens
             messages: [
               {
                 role: 'user',
@@ -381,6 +389,12 @@ ${chunk}
               },
             ],
           };
+
+          if (reasoningEffort) {
+            requestBody.reasoning_effort = reasoningEffort;
+          } else {
+            requestBody.temperature = parsedTemperature;
+          }
 
           // Delay progresivo para evitar rate limits (5s, 8s, 12s, etc.)
           const delay = i === 0 ? 0 : 5000 + (i * 3000);
@@ -450,9 +464,9 @@ ${reviewResults.join('\n\n---\n\n')}
       // Proceso normal para PRs pequeños
       console.log(`PR de tamaño normal (${diffSizeKB.toFixed(2)} KB). Procesando como un solo bloque...`);
       
-      const requestBody = {
-        max_tokens: parsedTokenMax,
-        temperature: parsedTemperature,
+      const requestBody: any = {
+        model: openaiModel,
+        max_completion_tokens: parsedTokenMax,
         messages: [
           {
             role: 'user',
@@ -470,6 +484,12 @@ ${fullPRDiff}
           },
         ],
       };
+
+      if (reasoningEffort) {
+        requestBody.reasoning_effort = reasoningEffort;
+      } else {
+        requestBody.temperature = parsedTemperature;
+      }
 
       const response = await makeRequestWithRetryAndDelay(aoiEndpoint, apiKey, requestBody, agent, 0);
 

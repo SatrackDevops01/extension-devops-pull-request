@@ -1,5 +1,4 @@
 import * as tl from "azure-pipelines-task-lib/task";
-import { Configuration, OpenAIApi } from 'openai';
 import { deleteExistingComments, addCommentToPR } from './services/pr';
 import { reviewFile, reviewCompletePR, consumeApi } from './core/review';
 import { getTargetBranchName } from './utils';
@@ -29,8 +28,7 @@ async function run() {
     const filesToExclude = tl.getInput('file_excludes', false);
     const openaiModel = tl.getInput('model') || 'gpt-4-32k';
     const useHttps = tl.getBoolInput('use_https', true);
-
-    const isNewModel = openaiModel.includes('gpt-5');
+    const reasoningEffort = tl.getInput('reasoning_effort', false) || undefined;
 
     console.log(`Modelo seleccionado: ${openaiModel}`);
 
@@ -90,7 +88,7 @@ async function run() {
       }
 
       const fullPRDiff = await getFullPRDiff(prNumber);
-      let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, isNewModel,additionalPrompts)
+      let review = await reviewCompletePR(fullPRDiff, prNumber, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, openaiModel, additionalPrompts, reasoningEffort)
       console.log(`Revision finalizada del pr ${prNumber}`)
       // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
       console.log(`----------------------------------`)
@@ -101,7 +99,7 @@ async function run() {
 
         const fileToReview = element;
         let diff = await _repository.GetDiff(fileToReview);
-        await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts, isNewModel)
+        await reviewFile(diff, fileToReview, Agent, apiKey, aoiEndpoint, tokenMax, temperature, prompt, additionalPrompts, openaiModel, reasoningEffort)
 
         console.log(`Revision finalizada del archivo ${fileToReview}`)
         // Generar un console.log con el consumo de tokens. El consumo está en la variable consumeApi generada en el archivo review.ts
